@@ -19,6 +19,7 @@ class Game # rubocop:disable Style/Documentation
     puts ''
     puts 'Game finished'
     puts "\e[1m#{players[(player_number - 1) % 2].name}\e[0m won !"
+    print_game(game_results)
 
     players[(player_number - 1) % 2]
   end
@@ -27,19 +28,41 @@ class Game # rubocop:disable Style/Documentation
 
   def game_finished?(array)
     array.each do |row|
-      return true if !row[0].strip.empty? && row.all?(row[0])
+      next unless !row[0].strip.empty? && row.all?(row[0])
+
+      row.each_with_index do |spot, index|
+        row[index] = "\e[33m\e[1m#{spot}\e[0m\e[0m"
+      end
+      return true
     end
 
     array.transpose.each do |column|
-      return true if !column[0].strip.empty? && column.all?(column[0])
+      next unless !column[0].strip.empty? && column.all?(column[0])
+
+      column.each_with_index do |spot, index|
+        column[index] = "\e[33m\e[1m#{spot}\e[0m\e[0m"
+      end
+      return true
     end
 
     main_diagonal = (0...array.length).collect { |i| array[i][i] }
-    return true if !main_diagonal[0].strip.empty? && main_diagonal.all?(main_diagonal[0])
+    if !main_diagonal[0].strip.empty? && main_diagonal.all?(main_diagonal[0])
+
+      (0...array.length).each do |i|
+        array[i][i] = "\e[33m\e[1m#{array[i][i]}\e[0m\e[0m"
+      end
+      return true
+    end
 
     secondary_diagonal = (0...array.length).collect { |i| array[i][array.length - 1 - i] }
-    return true if !secondary_diagonal[0].strip.empty? && secondary_diagonal.all?(secondary_diagonal[0])
 
+    if !secondary_diagonal[0].strip.empty? && secondary_diagonal.all?(secondary_diagonal[0])
+
+      (0...array.length).each do |i|
+        array[i][i] = "\e[33m\e[1m#{array[i][array.length - 1 - i]}\e[0m\e[0m"
+      end
+      return true
+    end
     false
   end
 
@@ -52,6 +75,7 @@ class Game # rubocop:disable Style/Documentation
       puts 'The symbol must be a single character'
     end
 
+    puts ''
     Player.new(player_name, player_symbol)
   end
 
@@ -71,6 +95,7 @@ class Game # rubocop:disable Style/Documentation
     col_separator = ' | '
     row_separator = '-------+-------+-------'
 
+    puts ''
     puts "\t   #{(1..array.length).to_a.join('       ')}"
     puts ''
 
@@ -78,6 +103,8 @@ class Game # rubocop:disable Style/Documentation
       puts "#{index + 1}\t   #{row.join("  #{col_separator}  ")}"
       puts "\t#{row_separator}" unless index == array.length - 1
     end
+
+    puts ''
   end
 
   def play_at_spot(player, spot, array)
@@ -99,6 +126,7 @@ class Game # rubocop:disable Style/Documentation
         break
       else
         puts 'Non-available spot'
+        puts ''
       end
     end
 
